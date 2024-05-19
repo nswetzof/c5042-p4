@@ -1,3 +1,8 @@
+/**
+ * @file TCPClient.cpp definition for TCPClient
+ * @author Kevin Lundeen
+ * @see Seattle University, CPSC 5042, Spring 2024, ICE 4 professor's solution
+ */
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -8,8 +13,8 @@
 #include "TCPClient.h"
 using namespace std;
 
-TCPClient::TCPClient(const string &server_host, const u_short server_port) : server(-1) {
-	server = socket(AF_INET, SOCK_STREAM, 0);
+TCPClient::TCPClient(const string &server_host, const u_short server_port) {
+    server = socket(AF_INET, SOCK_STREAM, 0);
     if (server < 0)
         throw runtime_error(strerror(errno));
 
@@ -27,31 +32,31 @@ TCPClient::TCPClient(const string &server_host, const u_short server_port) : ser
 }
 
 TCPClient::~TCPClient() {
-	if (server != -1) {
-		close(server);
-		server = -1;
-	}
+    if (server != -1) {
+        close(server);
+        server = -1;
+    }
 }
 
 void TCPClient::send_request(const string &request) {
-	ssize_t sent = send(server, request.c_str(), request.length(), 0);
-    if (sent < 0) {
+    const char *message = request.c_str();
+    ssize_t length = strlen(message);
+    ssize_t sent = send(server, message, length, 0);
+    if (sent < 0)
         throw runtime_error(strerror(errno));
-	}
 }
 
 string TCPClient::get_response() {
-	char buffer[4096];
+    char buffer[4096];
     ssize_t received = recv(server, buffer, sizeof(buffer), 0);
-    if (received < 0) {
+    if (received < 0)
         throw runtime_error(strerror(errno));
-	}
-	buffer[received] = '\0';
-	return string(buffer);
+    buffer[received] = '\0';
+    return string(buffer);
 }
 
 TCPClient::TCPClient(TCPClient &&other) noexcept {
-	this->server = other.server;
-	other.server = -1;
+    this->server = other.server;
+    other.server = -1;
 }
 
