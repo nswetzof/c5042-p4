@@ -18,12 +18,13 @@ protected:
     /**
      * Process transaction request
     */
-    bool process(const std::string &incoming_stream_piece) override;
-    void respond(const std::string &response) override;
+    // bool process(const std::string &incoming_stream_piece) override;
+    // void respond(const std::string &response) override;
 private:
     unordered_map<string, double> accounts;
-    ifstream acc_file;
-    ofstream log_file;
+    const string acc_file_name, log_file_name;
+    // ifstream acc_file;
+    // ofstream log_file;
 
     
 };
