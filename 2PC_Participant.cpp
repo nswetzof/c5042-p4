@@ -17,7 +17,8 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
         acc_num = line.substr(index + 1, line.length() - index);
-        accounts[acc_num] = balance;
+        accounts[acc_num].balance = balance;
+        accounts[acc_num].held = false;
     }
 
     acc_file.close();
@@ -27,7 +28,6 @@ Participant::~Participant() {}
 
 bool Participant::process(const string &incoming_stream_piece) {
     // TODO: have to log
-    int first_space = incoming_stream_piece.find(' ');
     vector<string> request = split(incoming_stream_piece);
     string type = request.at(0);
     string account;
@@ -46,11 +46,16 @@ bool Participant::process(const string &incoming_stream_piece) {
         }
 
         respond("VOTE-ABORT");
-        return false;
+        return true;
     }
 
     if (type == "GLOBAL-COMMIT") {
-        respond("ACK");
+        respond("ACK"); // TODO: Should this be before or after transaction?
+
+        // if (accounts.find(account) != accounts.end() && accounts[account].held) {
+        //     accounts[account].balance += 
+        // }
+
         // TODO: execute transaction and eliminate hold
         // TODO: need to determine protocol for this message type
         /*
@@ -83,15 +88,26 @@ bool Participant::process(const string &incoming_stream_piece) {
         else
             VOTE-ABORT
     */
+
+   return false; // FIXME: This will result in the server closing.  Make sure this should be here.
 }
 
-vector<string> split(const string &text, const char delimiter) {
+vector<string> Participant::split(const string &text, const char delimiter) {
     vector<string> result;
     int prev = 0;
-    int index = text.find(delimiter);
+    size_t index = text.find(delimiter);
     while (index != string::npos) {
         result.push_back(text.substr(prev, index - prev));
         prev = index;
         index = text.find(delimiter, index);
     }
+
+    return result;
+}
+
+void Participant::log(const string &note) {
+    ofstream log_file(log_file_name);
+
+    if (log_file.is_open())
+        log_file.write(note.c_str(), note.length());
 }

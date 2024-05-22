@@ -15,6 +15,12 @@ public:
     */
     Participant(const u_short port, const string acc_file_name, const string log_file_name);
     ~Participant();
+
+    /**
+     * Write a string to the last line of the log file
+     * @param note The string to write to the log file
+    */
+    void log(const string &note);
 protected:
     /**
      * Process transaction request
