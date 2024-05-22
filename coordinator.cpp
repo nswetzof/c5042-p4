@@ -8,9 +8,15 @@ using namespace std;
  *  log file, 
 */
 int main(int argc, char *argv[]) {
-    // create client
+    string source_host = argv[3], dest_host = argv[6];
+    int source_port = atoi(argv[4]), dest_port = atoi(argv[7]);
+
+    // create clients
+    TCPClient source_client(source_host, source_port);
+    TCPClient dest_client(dest_host, dest_port);
 
     // make requests to participants
+    
 
     // handle responses (block until receiving both)
     /*
