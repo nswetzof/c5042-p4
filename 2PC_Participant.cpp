@@ -1,5 +1,7 @@
 #include "2PC_Participant.h"
 
+#define DEBUG 1 // TODO: delete
+
 Participant::Participant(const u_short port, const string acc_file_name, const string log_file_name)
     : TCPServer(port), acc_file_name(acc_file_name), log_file_name(log_file_name) {
     string line;
@@ -22,6 +24,15 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     }
 
     acc_file.close();
+
+    serve();
+
+// #if DEBUG == 1
+// #include <iterator>
+//     unordered_map<string, account>::const_iterator iter;
+//     for (iter = accounts.begin(); iter != accounts.end(); iter++)
+//         cout << iter->first << endl;
+// #endif
 }
 
 Participant::~Participant() {}
