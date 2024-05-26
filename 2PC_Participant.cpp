@@ -22,10 +22,10 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = false;
     }
-
+    
     acc_file.close();
 
-    serve();
+    // serve();
 
 // #if DEBUG == 1
 // #include <iterator>
@@ -36,6 +36,10 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
 }
 
 Participant::~Participant() {}
+
+void Participant::start_client(const std::string &their_host, u_short their_port) {
+    cout << "Accepting coordinator connection. State: INIT" << endl; // FIXME probably don't want console output in class; don't have INIT state
+}
 
 bool Participant::process(const string &incoming_stream_piece) {
     // TODO: have to log
@@ -117,8 +121,11 @@ vector<string> Participant::split(const string &text, const char delimiter) {
 }
 
 void Participant::log(const string &note) {
+    cout << note << endl;
     ofstream log_file(log_file_name);
 
     if (log_file.is_open())
         log_file.write(note.c_str(), note.length());
+    
+    log_file.close();
 }

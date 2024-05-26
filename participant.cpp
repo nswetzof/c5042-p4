@@ -26,13 +26,13 @@ int main(int argc, char *argv[]) {
         cerr << "Invalid serve port " << serve_port << endl;
         return EXIT_FAILURE;
     }
-    cout << argc << " arguments" << endl;
-    for (int i = 0; i < argc; i++)
-        cout << "argument " << i << ": " << argv[i] << ", ";
-    cout << endl;
-
+    
     Participant participant(serve_port, argv[2], argv[3]);
     ostringstream note;
     note << "Transaction service on port " << serve_port << " (Ctrl-C to stop)" << endl;
+    // cout << note.str() << endl;
     participant.log(note.str());
+    participant.serve();
+
+    return EXIT_SUCCESS;
 }

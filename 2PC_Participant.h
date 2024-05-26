@@ -8,7 +8,7 @@
 
 using namespace std;
 
-class Participant : TCPServer {
+class Participant : public TCPServer {
 public:
     /**
      * Constructor stores accounts listed in file
@@ -22,6 +22,8 @@ public:
     */
     void log(const string &note);
 protected:
+    void start_client(const std::string &their_host, u_short their_port) override;
+
     /**
      * Process transaction request
      * @param incoming_stream_piece Message received from the coordinator.  Valid message types are as follows:
