@@ -39,6 +39,7 @@ Participant::~Participant() {}
 
 void Participant::start_client(const std::string &their_host, u_short their_port) {
     cout << "Accepting coordinator connection. State: INIT" << endl; // FIXME probably don't want console output in class; don't have INIT state
+    log("Accepting coordinator connection. State: INIT");
 }
 
 bool Participant::process(const string &incoming_stream_piece) {
@@ -116,6 +117,7 @@ vector<string> Participant::split(const string &text, const char delimiter) {
         prev = index;
         index = text.find(delimiter, index + 1);
     }
+    result.push_back(text.substr(prev, text.length()));
 
     return result;
 }
