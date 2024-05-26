@@ -114,7 +114,7 @@ vector<string> Participant::split(const string &text, const char delimiter) {
     while (index != string::npos) {
         result.push_back(text.substr(prev, index - prev));
         prev = index;
-        index = text.find(delimiter, index);
+        index = text.find(delimiter, index + 1);
     }
 
     return result;
