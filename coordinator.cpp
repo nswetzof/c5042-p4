@@ -20,11 +20,19 @@ void displayFileContents(ostream &output, string filename);
 */
 int main(int argc, char *argv[]) {
     const string LOG_FILE_NAME = argv[1];
+    const string VOTE_REQUEST = "VOTE-REQUEST";
+    const string COMMIT_RESPONSE = "VOTE-COMMIT";
+    const string ABORT_RESPONSE = "VOTE-ABORT";
+    const string GLOBAL_COMMIT = "GLOBAL-COMMIT";
+    const string GLOBAL_ABORT = "GLOBAL-ABORT";
+    const string ACK = "ACK";
+
     string source_host = argv[3], dest_host = argv[6];
     int source_port = atoi(argv[4]), dest_port = atoi(argv[7]);
     string transfer = argv[2]; // TODO: handle numbers < 0
     string source_account = argv[5], dest_account = argv[8];
     string source_response, dest_response;
+    string message;
     fstream logfile(LOG_FILE_NAME, fstream::in | fstream::out);
 
     if (!logfile.is_open())
@@ -35,20 +43,45 @@ int main(int argc, char *argv[]) {
     TCPClient dest_client(dest_host, dest_port);
 
     // make requests to participants
-    logfile << "Sending message 'VOTE-REQUEST' " + source_account << " -" << transfer << " to " 
+    logfile << "Sending message '" << VOTE_REQUEST << "' " << source_account << " -" << transfer << " to " 
         << source_host << ":" << source_port << endl;
-    source_client.send_request("VOTE-REQUEST -" + transfer + " " + source_account);
+    source_client.send_request(VOTE_REQUEST + " -" + transfer + " " + source_account);
 
-    logfile << "Sending message 'VOTE-REQUEST' " + dest_account << " " << transfer << " to " 
+    logfile << "Sending message '" << VOTE_REQUEST << "' " << dest_account << " " << transfer << " to " 
         << dest_host << ":" << dest_port << endl;
-    dest_client.send_request("VOTE-REQUEST " + transfer + " " + dest_account);
+    dest_client.send_request(VOTE_REQUEST + " " + transfer + " " + dest_account);
 
     source_response = source_client.get_response();
     logfile << "Got " << source_response << " from " << source_host << ":" << source_port << endl;
     dest_response = dest_client.get_response();
     logfile << "Got " << dest_response << " from " << dest_host << ":" << dest_port << endl;
 
-    // handle responses (block until receiving both)
+    if (source_response == COMMIT_RESPONSE && dest_response == COMMIT_RESPONSE)
+        message = GLOBAL_COMMIT;
+    else
+        message = GLOBAL_ABORT;
+
+    logfile << "Sending message '" << message << "' to " 
+        << source_host << ":" << source_port << endl;
+    source_client.send_request(message);
+
+    logfile << "Sending message '" << message << "' to " 
+        << dest_host << ":" << dest_port << endl;
+    dest_client.send_request(message);
+
+    source_response = source_client.get_response();
+    dest_response = dest_client.get_response();
+
+
+    if (source_response == ACK && dest_response == ACK) {
+        if (message == GLOBAL_COMMIT)
+            logfile << "Transaction committed." << endl;
+        else
+            logfile << "Transaction aborted." << endl;
+    }
+    else
+        return EXIT_FAILURE;
+    
     /*
         if both VOTE-COMMIT
             respond GLOBAL-COMMIT
@@ -62,9 +95,8 @@ int main(int argc, char *argv[]) {
             ask for another acknowledgement?
     */
 
-   // exit program
-   // Extra Credit: start new thread on request?
-    string line;
+    // exit program
+    // Extra Credit: start new thread on request?
 
     logfile.close();
 

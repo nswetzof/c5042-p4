@@ -49,16 +49,16 @@ bool Participant::process(const string &incoming_stream_piece) {
         amount = atof(request.at(1).c_str());
         account = request.at(2);
 
-        log(to_string(accounts[account].balance));
-
         if (accounts.find(account) != accounts.end()) {
             if (accounts[account].balance + amount >= 0 && !accounts[account].held) {
                 accounts[account].held = true;
+                log("Got " + type + ", replying VOTE-COMMIT.  State: READY");
                 respond("VOTE-COMMIT");
                 return true;
             }
         }
 
+        log("Got " + type + ", replying VOTE-ABORT.  State: ABORT");
         respond("VOTE-ABORT");
         return true;
     }
