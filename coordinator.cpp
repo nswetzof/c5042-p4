@@ -4,14 +4,22 @@
 
 using namespace std;
 
+/**
+ * Write the contents of a file to an output stream
+ * @param output The output stream to write to
+ * @param filename The name of the file to read from
+*/
 void displayFileContents(ostream &output, string filename);
 
+// TODO: delete comment?
 /**
  * @param argv string array with elements representing 
- *  log file, 
+ *  executable file, log file, transaction amount, source hostname, source port, source account,
+ *  destination hostname, destination port, and destination account
+ * @param argc number of arguments
 */
 int main(int argc, char *argv[]) {
-    const string LOG_FILE_NAME = "log.txt";
+    const string LOG_FILE_NAME = argv[1];
     string source_host = argv[3], dest_host = argv[6];
     int source_port = atoi(argv[4]), dest_port = atoi(argv[7]);
     string transfer = argv[2]; // TODO: handle numbers < 0

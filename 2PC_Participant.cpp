@@ -9,6 +9,11 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     double balance;
     int index;
 
+    // TODO: make sure this is correct behavior
+    // clear out log file
+    ofstream log_file = ofstream(log_file_name);
+    log_file.close();
+
     ifstream acc_file(acc_file_name);
     if (!acc_file.is_open()) {
         throw runtime_error("Failed to open " + acc_file_name);
@@ -18,28 +23,19 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     while(getline(acc_file, line)) {
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
-        acc_num = line.substr(index + 1, line.length() - index);
+        acc_num = line.substr(index + 1, line.length() - index - 2);
+
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = false;
     }
     
     acc_file.close();
-
-    // serve();
-
-// #if DEBUG == 1
-// #include <iterator>
-//     unordered_map<string, account>::const_iterator iter;
-//     for (iter = accounts.begin(); iter != accounts.end(); iter++)
-//         cout << iter->first << endl;
-// #endif
 }
 
 Participant::~Participant() {}
 
 void Participant::start_client(const std::string &their_host, u_short their_port) {
-    cout << "Accepting coordinator connection. State: INIT" << endl; // FIXME probably don't want console output in class; don't have INIT state
-    log("Accepting coordinator connection. State: INIT");
+    log("Accepting coordinator connection. State: INIT\n");
 }
 
 bool Participant::process(const string &incoming_stream_piece) {
@@ -52,6 +48,8 @@ bool Participant::process(const string &incoming_stream_piece) {
     if (type == "VOTE-REQUEST") {
         amount = atof(request.at(1).c_str());
         account = request.at(2);
+
+        log(to_string(accounts[account].balance));
 
         if (accounts.find(account) != accounts.end()) {
             if (accounts[account].balance + amount >= 0 && !accounts[account].held) {
@@ -114,7 +112,7 @@ vector<string> Participant::split(const string &text, const char delimiter) {
     size_t index = text.find(delimiter);
     while (index != string::npos) {
         result.push_back(text.substr(prev, index - prev));
-        prev = index;
+        prev = index + 1;
         index = text.find(delimiter, index + 1);
     }
     result.push_back(text.substr(prev, text.length()));
@@ -123,11 +121,10 @@ vector<string> Participant::split(const string &text, const char delimiter) {
 }
 
 void Participant::log(const string &note) {
-    cout << note << endl;
-    ofstream log_file(log_file_name);
+    ofstream log_file(log_file_name, fstream::app);
 
     if (log_file.is_open())
-        log_file.write(note.c_str(), note.length());
+        log_file << note;
     
     log_file.close();
 }
