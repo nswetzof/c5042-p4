@@ -16,14 +16,14 @@ int main(int argc, char *argv[]) {
     TCPClient dest_client(dest_host, dest_port);
 
     // make requests to participants
-    
+    source_client.send_request() // TODO: continue
 
     // handle responses (block until receiving both)
     /*
         if both VOTE-COMMIT
             respond GLOBAL-COMMIT
         if any VOTE-ABORT
-            respond GLOBAL-ABORT
+            respond GLOBAL-ABORT (except to aborting participant)
         
         wait for ACKS
         if ACKS received
@@ -31,4 +31,7 @@ int main(int argc, char *argv[]) {
         else
             ask for another acknowledgement?
     */
+
+   // exit program
+   // Extra Credit: start new thread on request?
 }
