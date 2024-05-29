@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     string source_account = argv[5], dest_account = argv[8];
     string source_response, dest_response;
     string message;
-    fstream logfile(LOG_FILE_NAME, fstream::in | fstream::out);
+    ofstream logfile(LOG_FILE_NAME);
 
     if (!logfile.is_open())
         throw runtime_error("Failed to open " + LOG_FILE_NAME);

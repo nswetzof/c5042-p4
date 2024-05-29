@@ -34,5 +34,10 @@ int main(int argc, char *argv[]) {
     participant.log(note.str());
     participant.serve();
 
+    ifstream logfile(argv[3]);
+    string line;
+    while (getline(logfile, line))
+        cout << line << endl;
+
     return EXIT_SUCCESS;
 }

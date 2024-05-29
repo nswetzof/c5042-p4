@@ -23,10 +23,13 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     while(getline(acc_file, line)) {
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
-        acc_num = line.substr(index + 1, line.length() - index - 2);
+        acc_num = line.substr(index + 1, line.length() - index - 1);
 
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = false;
+
+        // TODO: delete debugging line
+        log("string length: " + to_string(acc_num.length()) + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + '\n');
     }
     
     acc_file.close();
