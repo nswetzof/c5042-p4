@@ -39,7 +39,7 @@ protected:
 private:
     struct account {
         double balance;
-        bool held;
+        double held;
     };
     unordered_map<string, account> accounts;
     const string acc_file_name, log_file_name;

@@ -27,9 +27,6 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
 
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = false;
-
-        // TODO: delete debugging line
-        log("string length: " + to_string(acc_num.length()) + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + '\n');
     }
     
     acc_file.close();
@@ -53,8 +50,8 @@ bool Participant::process(const string &incoming_stream_piece) {
         account = request.at(2);
 
         if (accounts.find(account) != accounts.end()) {
-            if (accounts[account].balance + amount >= 0 && !accounts[account].held) {
-                accounts[account].held = true;
+            if (accounts[account].balance - accounts[account].held + amount >= 0) {
+                accounts[account].held += amount;
                 log("Got " + type + ", replying VOTE-COMMIT.  State: READY");
                 respond("VOTE-COMMIT");
                 return true;
@@ -89,6 +86,7 @@ bool Participant::process(const string &incoming_stream_piece) {
 
     if (type == "GLOBAL-ABORT") {
         respond("ACK");
+        
         // TODO: eliminate hold
         return true;
     }
