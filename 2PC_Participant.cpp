@@ -114,13 +114,14 @@ vector<string> Participant::split(const string &text, const char delimiter) {
 
 void Participant::updateAccounts() {
     ofstream file(acc_file_name);
-    // ifstream file(acc_file_name);
-    // stringstream ss();
 
     unordered_map<string, account>::const_iterator iter = accounts.begin();
+    file.precision(2);
 
-    while (iter != accounts.end())
-        file << iter->first << ' ' << iter->second.balance << endl;
+    while (iter != accounts.end()) {
+        file << fixed << iter->second.balance << ' ' << iter->first << endl;
+        iter++;
+    }
 
     file.close();
 }
