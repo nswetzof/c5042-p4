@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
     // create clients
     TCPClient source_client(source_host, source_port);
     TCPClient dest_client(dest_host, dest_port);
+    int transaction_id = 1; // TODO: modify
+    string tid = to_string(transaction_id);
 
     // make requests to participants
     logfile << "Sending message '" << VOTE_REQUEST << "' " << source_account << " -" << transfer << " to " 
@@ -56,18 +58,19 @@ int main(int argc, char *argv[]) {
     dest_response = dest_client.get_response();
     logfile << "Got " << dest_response << " from " << dest_host << ":" << dest_port << endl;
 
-    if (source_response == COMMIT_RESPONSE && dest_response == COMMIT_RESPONSE)
+    if (source_response == COMMIT_RESPONSE
+        && dest_response == COMMIT_RESPONSE)
         message = GLOBAL_COMMIT;
     else
         message = GLOBAL_ABORT;
 
-    logfile << "Sending message '" << message << "' to " 
+    logfile << "Sending message '" << message << " to " 
         << source_host << ":" << source_port << endl;
-    source_client.send_request(message);
+    source_client.send_request(message + ' ' + source_account);
 
-    logfile << "Sending message '" << message << "' to " 
+    logfile << "Sending message '" << message << " to " 
         << dest_host << ":" << dest_port << endl;
-    dest_client.send_request(message);
+    dest_client.send_request(message + ' ' + dest_account);
 
     source_response = source_client.get_response();
     dest_response = dest_client.get_response();
@@ -80,7 +83,7 @@ int main(int argc, char *argv[]) {
             logfile << "Transaction aborted." << endl;
     }
     else
-        return EXIT_FAILURE;
+        return EXIT_FAILURE; // TODO: probably change this behavior
     
     /*
         if both VOTE-COMMIT

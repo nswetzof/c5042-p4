@@ -42,6 +42,7 @@ private:
         double held;
     };
     unordered_map<string, account> accounts;
+    unordered_map<int, string> open_transactions;
     const string acc_file_name, log_file_name;
     // ifstream acc_file;
     // ofstream log_file;
@@ -53,6 +54,13 @@ private:
      * @param delimiter Character which delimits the separation
     */
     vector<string> split(const string &text, const char delimiter = ' ');
-    bool processDeposit(string acc_num, double balance);
-    bool processWithdrawal(string acc_num, double balance);
+
+    /**
+     * Updates the accounts file associated with this instance with the current balances stored in
+     *  accounts
+    */
+    void updateAccounts();
+    
+    // bool processDeposit(string acc_num, double balance);
+    // bool processWithdrawal(string acc_num, double balance);
 };

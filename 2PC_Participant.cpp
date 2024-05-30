@@ -23,10 +23,12 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     while(getline(acc_file, line)) {
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
-        acc_num = line.substr(index + 1, line.length() - index - 1);
+        acc_num = line.substr(index + 1, line.length() - index - 2); // FIXME: handle this better (newlines not consistent across systems)
+        // acc_num.erase(std::find_if(acc_num.begin(), acc_num.end(), [](int c) {return isspace(c);}));
 
         accounts[acc_num].balance = balance;
-        accounts[acc_num].held = false;
+        accounts[acc_num].held = 0;
+        log(acc_num.length() + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + '\n');
     }
     
     acc_file.close();
@@ -64,45 +66,34 @@ bool Participant::process(const string &incoming_stream_piece) {
     }
 
     if (type == "GLOBAL-COMMIT") {
-        respond("ACK"); // TODO: Should this be before or after transaction?
-
-        // if (accounts.find(account) != accounts.end() && accounts[account].held) {
-        //     accounts[account].balance += 
-        // }
-
         // TODO: execute transaction and eliminate hold
-        // TODO: need to determine protocol for this message type
-        /*
-        check if account exists
-            check if hold has been placed
-                execute transaction
-                respond that transaction was executed
+        account = request.at(1);
+        if (accounts.find(account) != accounts.end()) {
+            accounts[account].balance -= accounts[account].held;
+            accounts[account].held = 0;
+
+            // TODO: update accounts file
+            updateAccounts();
+        }
         else
-            failure message
-            remove hold
-        */
+            throw runtime_error("Could not commit.  " + account + " not found");
+        
+        respond("ACK"); // TODO: Should this be before or after transaction?
         return true;
     }
 
     if (type == "GLOBAL-ABORT") {
         respond("ACK");
         
-        // TODO: eliminate hold
+        account = request.at(1);
+
+        if (accounts.find(account) != accounts.end())
+            accounts[account].held = 0;
+        else
+            throw runtime_error("No transaction to abort.  " + account + " not found");
+
         return true;
     }
-    // TODO
-    /* 
-    if deposit
-        if account exists
-            VOTE-COMMIT
-        else
-            VOTE-ABORT
-    if withdraw
-        if account exists and sufficient funds
-            VOTE-COMMIT
-        else
-            VOTE-ABORT
-    */
 
    return false; // FIXME: This will result in the server closing.  Make sure this should be here.
 }
@@ -119,6 +110,19 @@ vector<string> Participant::split(const string &text, const char delimiter) {
     result.push_back(text.substr(prev, text.length()));
 
     return result;
+}
+
+void Participant::updateAccounts() {
+    ofstream file(acc_file_name);
+    // ifstream file(acc_file_name);
+    // stringstream ss();
+
+    unordered_map<string, account>::const_iterator iter = accounts.begin();
+
+    while (iter != accounts.end())
+        file << iter->first << ' ' << iter->second.balance << endl;
+
+    file.close();
 }
 
 void Participant::log(const string &note) {
