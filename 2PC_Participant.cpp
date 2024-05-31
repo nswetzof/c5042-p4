@@ -11,7 +11,7 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
 
     // TODO: make sure this is correct behavior
     // clear out log file
-    ofstream log_file = ofstream(log_file_name);
+    ofstream log_file = ofstream(log_file_name, ofstream::app);
     log_file.close();
 
     ifstream acc_file(acc_file_name);
@@ -23,12 +23,14 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     while(getline(acc_file, line)) {
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
-        acc_num = line.substr(index + 1, line.length() - index - 2); // FIXME: handle this better (newlines not consistent across systems)
+        // acc_num = line.substr(index + 1, line.length() - index - 2); // FIXME: handle this better (newlines not consistent across systems)
+        acc_num = rtrim(line).substr(index + 1, line.length() - index - 1);
         // acc_num.erase(std::find_if(acc_num.begin(), acc_num.end(), [](int c) {return isspace(c);}));
+        log("stored account: " + to_string(balance) + " -> " + acc_num + '\n');
 
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = 0;
-        log(acc_num.length() + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + '\n');
+        // log(acc_num.length() + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + "\n");
     }
     
     acc_file.close();
@@ -50,17 +52,19 @@ bool Participant::process(const string &incoming_stream_piece) {
     if (type == "VOTE-REQUEST") {
         amount = atof(request.at(1).c_str());
         account = request.at(2);
+        log("Amount to change: " + to_string(amount) + ", expected: " + request.at(1) + '\n'); // TODO: DELETE
 
+        log(account + ": " + to_string(accounts[account].balance) + '\n');
         if (accounts.find(account) != accounts.end()) {
             if (accounts[account].balance - accounts[account].held + amount >= 0) {
-                accounts[account].held += amount;
-                log("Got " + type + ", replying VOTE-COMMIT.  State: READY");
+                accounts[account].held -= amount;
+                log("\nGot " + type + ", replying VOTE-COMMIT.  State: READY");
                 respond("VOTE-COMMIT");
                 return true;
             }
         }
 
-        log("Got " + type + ", replying VOTE-ABORT.  State: ABORT");
+        log("\nGot " + type + ", replying VOTE-ABORT.  State: ABORT");
         respond("VOTE-ABORT");
         return true;
     }
@@ -72,18 +76,18 @@ bool Participant::process(const string &incoming_stream_piece) {
             accounts[account].balance -= accounts[account].held;
             accounts[account].held = 0;
 
-            // TODO: update accounts file
+            // update accounts file
             updateAccounts();
         }
         else
             throw runtime_error("Could not commit.  " + account + " not found");
         
+        log("Got GLOBAL-COMMIT, replying ACK. State: COMMIT");
         respond("ACK"); // TODO: Should this be before or after transaction?
         return true;
     }
 
     if (type == "GLOBAL-ABORT") {
-        respond("ACK");
         
         account = request.at(1);
 
@@ -92,6 +96,8 @@ bool Participant::process(const string &incoming_stream_piece) {
         else
             throw runtime_error("No transaction to abort.  " + account + " not found");
 
+        log("Got GLOBAL-ABORT, replying ACK. State: ABORT");
+        respond("ACK");
         return true;
     }
 
@@ -110,6 +116,14 @@ vector<string> Participant::split(const string &text, const char delimiter) {
     result.push_back(text.substr(prev, text.length()));
 
     return result;
+}
+
+string Participant::rtrim(const string &s) {
+    int last = s.length() - 1;
+    while (isspace(s[last]))
+        last--;
+    
+    return s.substr(0, last + 1);
 }
 
 void Participant::updateAccounts() {

@@ -53,7 +53,12 @@ private:
      * @param text String to split
      * @param delimiter Character which delimits the separation
     */
-    vector<string> split(const string &text, const char delimiter = ' ');
+    static vector<string> split(const string &text, const char delimiter = ' ');
+
+    /**
+     * @return Input string with whitespace characters removed from the end
+    */
+    static string rtrim(const string &s);
 
     /**
      * Updates the accounts file associated with this instance with the current balances stored in
