@@ -21,6 +21,7 @@ public:
      * @param note The string to write to the log file
     */
     void log(const string &note);
+
 protected:
     void start_client(const std::string &their_host, u_short their_port) override;
 
@@ -32,7 +33,7 @@ protected:
      *      and a VOTE-COMMIT response will be sent to the coordinator
      *  GLOBAL-COMMIT - execute the transaction
      *  GLOBAL-ABORT - abort the transaction
-     * @return true if request is satisfied, false otherwise
+     * @return true if request is valid depending on the state of the Participant.
     */
     bool process(const std::string &incoming_stream_piece) override;
     // void respond(const std::string &response) override; // TODO: Delete?  Don't see why this needs to be overridden
@@ -42,10 +43,16 @@ private:
         double held;
     };
     unordered_map<string, account> accounts;
-    unordered_map<int, string> open_transactions;
+    // unordered_map<int, string> open_transactions;
     const string acc_file_name, log_file_name;
-    // ifstream acc_file;
-    // ofstream log_file;
+    enum State {INIT, READY, COMMIT, ABORT};
+    State state;
+
+    /**
+     * Updates the accounts file associated with this instance with the current balances stored in
+     *  the accounts map
+    */
+    void updateAccounts();
 
     /**
      * Splits a string into multiple strings defined by a delimiter
@@ -59,13 +66,4 @@ private:
      * @return Input string with whitespace characters removed from the end
     */
     static string rtrim(const string &s);
-
-    /**
-     * Updates the accounts file associated with this instance with the current balances stored in
-     *  accounts
-    */
-    void updateAccounts();
-    
-    // bool processDeposit(string acc_num, double balance);
-    // bool processWithdrawal(string acc_num, double balance);
 };

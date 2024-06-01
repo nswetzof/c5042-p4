@@ -29,8 +29,7 @@ int main(int argc, char *argv[]) {
     
     Participant participant(serve_port, argv[2], argv[3]);
     ostringstream note;
-    note << "Transaction service on port " << serve_port << " (Ctrl-C to stop)" << endl;
-    // cout << note.str() << endl;
+    note << "Transaction service on port " << serve_port << " (Ctrl-C to stop)";
     participant.log(note.str());
     participant.serve();
 

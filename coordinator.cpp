@@ -11,13 +11,6 @@ using namespace std;
 */
 void displayFileContents(ostream &output, string filename);
 
-// TODO: delete comment?
-/**
- * @param argv string array with elements representing 
- *  executable file, log file, transaction amount, source hostname, source port, source account,
- *  destination hostname, destination port, and destination account
- * @param argc number of arguments
-*/
 int main(int argc, char *argv[]) {
     const string LOG_FILE_NAME = argv[1];
     const string VOTE_REQUEST = "VOTE-REQUEST";
@@ -41,8 +34,8 @@ int main(int argc, char *argv[]) {
     // create clients
     TCPClient source_client(source_host, source_port);
     TCPClient dest_client(dest_host, dest_port);
-    int transaction_id = 1; // TODO: modify
-    string tid = to_string(transaction_id);
+    // int transaction_id = 1; // TODO: modify or delete
+    // string tid = to_string(transaction_id);
 
     // make requests to participants
     logfile << "Sending message '" << VOTE_REQUEST << "' " << source_account << " -" << transfer << " to " 
@@ -82,24 +75,13 @@ int main(int argc, char *argv[]) {
         else
             logfile << "Transaction aborted." << endl;
     }
-    else
-        return EXIT_FAILURE; // TODO: probably change this behavior
-    
-    /*
-        if both VOTE-COMMIT
-            respond GLOBAL-COMMIT
-        if any VOTE-ABORT
-            respond GLOBAL-ABORT (except to aborting participant)
-        
-        wait for ACKS
-        if ACKS received
-            log transaction committed
-        else
-            ask for another acknowledgement?
-    */
+    else {
+        logfile << "Invalid response\n\tsource response: " << source_response
+            << "\n\tdestination response: " << dest_response << endl;
+        return EXIT_FAILURE;
+    }
 
-    // exit program
-    // Extra Credit: start new thread on request?
+    // TODO: Extra Credit: start new thread on request?
 
     logfile.close();
 
@@ -112,4 +94,6 @@ void displayFileContents(ostream &output, string filename) {
 
     while (getline(file, line))
         output << line << endl;
+
+    file.close();
 }
