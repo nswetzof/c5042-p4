@@ -38,14 +38,22 @@ protected:
     bool process(const std::string &incoming_stream_piece) override;
     // void respond(const std::string &response) override; // TODO: Delete?  Don't see why this needs to be overridden
 private:
+    enum State {INIT, READY, COMMIT, ABORT};
     struct account {
         double balance;
         double held;
     };
+
+    struct Transaction {
+        string account;
+        // double balance;
+        double hold;
+        State state;
+    };
+
     unordered_map<string, account> accounts;
-    // unordered_map<int, string> open_transactions;
+    unordered_map<int, Transaction> open_transactions;
     const string acc_file_name, log_file_name;
-    enum State {INIT, READY, COMMIT, ABORT};
     State state;
 
     /**
