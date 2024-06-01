@@ -31,11 +31,18 @@ int main(int argc, char *argv[]) {
     if (!logfile.is_open())
         throw runtime_error("Failed to open " + LOG_FILE_NAME);
 
+    logfile << "Transaction: $" << transfer
+        << "\n\tFrom:\t" << source_host << ":" << source_port << " account #" << source_account
+        << "\n\tTo:\t" << dest_host << ":" << dest_port << " account #" << dest_account << endl;
+
     // create clients
     TCPClient source_client(source_host, source_port);
     TCPClient dest_client(dest_host, dest_port);
     // int transaction_id = 1; // TODO: modify or delete
     // string tid = to_string(transaction_id);
+
+    logfile << "Conected to participant " << source_host << ":" << source_port << endl;
+    logfile << "Conected to participant " << dest_host << ":" << dest_port << endl;
 
     // make requests to participants
     logfile << "Sending message '" << VOTE_REQUEST << "' " << source_account << " -" << transfer << " to " 
@@ -57,11 +64,11 @@ int main(int argc, char *argv[]) {
     else
         message = GLOBAL_ABORT;
 
-    logfile << "Sending message '" << message << " to " 
+    logfile << "Sending message '" << message << "' to " 
         << source_host << ":" << source_port << endl;
     source_client.send_request(message + ' ' + source_account);
 
-    logfile << "Sending message '" << message << " to " 
+    logfile << "Sending message '" << message << "' to " 
         << dest_host << ":" << dest_port << endl;
     dest_client.send_request(message + ' ' + dest_account);
 

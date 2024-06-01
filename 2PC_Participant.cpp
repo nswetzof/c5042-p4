@@ -21,13 +21,10 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     while(getline(acc_file, line)) {
         index = line.find(' ');
         balance = atof((line.substr(0, index + 1)).c_str());
-        // acc_num = line.substr(index + 1, line.length() - index - 2); // FIXME: handle this better (newlines not consistent across systems)
         acc_num = rtrim(line).substr(index + 1, line.length() - index - 1);
-        // acc_num.erase(std::find_if(acc_num.begin(), acc_num.end(), [](int c) {return isspace(c);}));
 
         accounts[acc_num].balance = balance;
         accounts[acc_num].held = 0;
-        // log(acc_num.length() + ", " + acc_num + ": " + to_string(accounts[acc_num].balance) + "\n");
     }
     
     acc_file.close();
@@ -52,6 +49,7 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
 
         amount = atof(request.at(1).c_str());
         account = request.at(2);
+        log("Holding " + to_string(amount) + " from account " + account);
 
         if (accounts.find(account) != accounts.end()) {
             if (accounts[account].balance - accounts[account].held + amount >= 0) {
@@ -64,7 +62,7 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
             }
         }
 
-        log("\nGot " + type + ", replying VOTE-ABORT.  State: ABORT");
+        log("Got " + type + ", replying VOTE-ABORT.  State: ABORT");
         respond("VOTE-ABORT");
         state = ABORT;
 
@@ -84,7 +82,7 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
         log("Got GLOBAL-COMMIT, replying ACK. State: COMMIT");
         respond("ACK");
         
-        log("Committing " + to_string(-1 * accounts[account].held) + " from account " + account);
+        log("Committing " + to_string(-1 * accounts[account].held) + " from account " + account + '\n');
         accounts[account].balance -= accounts[account].held;
         accounts[account].held = 0;
         updateAccounts();
@@ -97,6 +95,7 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
         if (state != READY && state != ABORT)
             throw runtime_error("Invalid state.  Cannot handle " + type + " unless in READY or ABORT state.");
 
+        account = request.at(1);
         if (accounts.find(account) == accounts.end())
             throw runtime_error("No transaction to abort.  " + account + " not found");
 
@@ -104,7 +103,7 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
         log("Got GLOBAL-ABORT, replying ACK. State: ABORT");
         respond("ACK");
         
-        log("Releasing hold from account " + account);
+        log("Releasing hold from account " + account + '\n');
         account = request.at(1);
         accounts[account].held = 0;
 
