@@ -3,6 +3,7 @@
  * @author Kevin Lundeen
  * @see Seattle University, CPSC 5042, Spring 2024, ICE 4 professor's solution
  */
+#include <future>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -52,7 +53,8 @@ void TCPServer::serve() {
             throw runtime_error(strerror(errno));
         buffer[received] = '\0';  // null-terminate c-style string
         string request(buffer);
-        if (!process(request)) {
+        future<bool> responseHandle = async(&TCPServer::process, *this, &request);
+        if (!responseHandle.get()) {
             return;
         }
     }

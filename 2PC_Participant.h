@@ -1,5 +1,6 @@
 #pragma once
 
+#include <future>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -35,7 +36,7 @@ protected:
      *  GLOBAL-ABORT - abort the transaction
      * @return true if request is valid depending on the state of the Participant.
     */
-    bool process(const std::string &incoming_stream_piece) override;
+    bool process(const std::string *incoming_stream_piece) override;
     // void respond(const std::string &response) override; // TODO: Delete?  Don't see why this needs to be overridden
 private:
     enum State {INIT, READY, COMMIT, ABORT};
@@ -55,6 +56,7 @@ private:
     unordered_map<int, Transaction> open_transactions;
     const string acc_file_name, log_file_name;
     State state;
+    mutex guard;
 
     /**
      * Updates the accounts file associated with this instance with the current balances stored in

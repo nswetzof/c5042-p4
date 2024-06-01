@@ -12,7 +12,7 @@ struct account {
 };
 
 
-/**
+/** // TODO: check this
  * @param argv string array with elements representing 
  *  port number, accounts file, and log file respectively
 */

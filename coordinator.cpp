@@ -1,3 +1,4 @@
+#include <future>
 #include <fstream>
 #include <iostream>
 #include "TCPClient.h"

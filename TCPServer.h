@@ -40,7 +40,7 @@ public:
 
 protected:
     virtual void start_client(const std::string &their_host, u_short their_port) {}
-    virtual bool process(const std::string &incoming_stream_piece) {return false;}
+    virtual bool process(const std::string *incoming_stream_piece) {return false;}
     virtual void respond(const std::string &response);
 
 private:
