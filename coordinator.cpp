@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
         << dest_host << ":" << dest_port << endl;
     dest_client.send_request(VOTE_REQUEST + " " + transfer + " " + dest_account);
 
+    // get participant responses
     source_response = source_client.get_response();
     logfile << "Got " << source_response << " from " << source_host << ":" << source_port << endl;
     dest_response = dest_client.get_response();
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]) {
     else
         message = GLOBAL_ABORT;
 
+    // send GLOBAL-COMMIT or GLOBAL-ABORT
     logfile << "Sending message '" << message << "' to " 
         << source_host << ":" << source_port << endl;
     source_client.send_request(message + ' ' + source_account);
@@ -72,9 +74,9 @@ int main(int argc, char *argv[]) {
         << dest_host << ":" << dest_port << endl;
     dest_client.send_request(message + ' ' + dest_account);
 
+    // wait for ACKs
     source_response = source_client.get_response();
     dest_response = dest_client.get_response();
-
 
     if (source_response == ACK && dest_response == ACK) {
         if (message == GLOBAL_COMMIT)
