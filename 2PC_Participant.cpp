@@ -80,14 +80,13 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
         if (accounts.find(account) == accounts.end())
             throw runtime_error("Error: " + account + " not found");
 
-        accounts[account].balance -= accounts[account].held;
-        accounts[account].held = 0;
-
         state = COMMIT;
         log("Got GLOBAL-COMMIT, replying ACK. State: COMMIT");
         respond("ACK");
         
         log("Committing " + to_string(-1 * accounts[account].held) + " from account " + account);
+        accounts[account].balance -= accounts[account].held;
+        accounts[account].held = 0;
         updateAccounts();
         state = INIT;
 
@@ -153,10 +152,10 @@ void Participant::updateAccounts() {
 }
 
 void Participant::log(const string &note) {
-    ofstream log_file(log_file_name, fstream::app);
+    ofstream logfile(log_file_name, fstream::app);
 
-    if (log_file.is_open())
-        log_file << note << endl;
+    if (logfile.is_open())
+        logfile << note << endl;
     
-    log_file.close();
+    logfile.close();
 }
