@@ -53,7 +53,7 @@ void TCPServer::serve() {
             throw runtime_error(strerror(errno));
         buffer[received] = '\0';  // null-terminate c-style string
         string request(buffer);
-        future<bool> responseHandle = async(&TCPServer::process, *this, &request);
+        future<bool> responseHandle = async(&TCPServer::process, this, request);
         if (!responseHandle.get()) {
             return;
         }
