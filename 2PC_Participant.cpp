@@ -7,11 +7,6 @@ Participant::Participant(const u_short port, const string acc_file_name, const s
     double balance;
     int index;
 
-    // TODO: make sure this is correct behavior
-    // clear out log file
-    ofstream log_file = ofstream(log_file_name, ofstream::app);
-    log_file.close();
-
     ifstream acc_file(acc_file_name);
     if (!acc_file.is_open()) {
         throw runtime_error("Failed to open " + acc_file_name);
@@ -36,7 +31,7 @@ void Participant::start_client(const std::string &their_host, u_short their_port
     log("Accepting coordinator connection. State: INIT");
 }
 
-bool Participant::process(const string &incoming_stream_piece) {  // TODO: add mutex pointer for extra credit portion
+bool Participant::process(const string &incoming_stream_piece) {
     vector<string> request = split(incoming_stream_piece);
     string type = request.at(0);
     string account;
@@ -110,7 +105,8 @@ bool Participant::process(const string &incoming_stream_piece) {  // TODO: add m
         return true;
     }
 
-   return false; // FIXME: This will result in the server closing.  Make sure this should be here.
+    // log("Why am I here?");
+    return false; // FIXME: This will result in the server closing.
 }
 
 vector<string> Participant::split(const string &text, const char delimiter) {

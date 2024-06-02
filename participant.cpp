@@ -31,7 +31,11 @@ int main(int argc, char *argv[]) {
     ostringstream note;
     note << "Transaction service on port " << serve_port << " (Ctrl-C to stop)";
     participant.log(note.str());
-    participant.serve();
+    cout << note.str() << endl;
+
+    // while loop allows for additional connections after first client terminates
+    while (true)
+        participant.serve();
 
     // print log to console
     ifstream logfile(argv[3]);

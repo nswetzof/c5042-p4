@@ -95,13 +95,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // TODO: Extra Credit: start new thread on request?
-    /*
-        take file input
-        each line specifies a transaction id, host, port, amount, and account number
-        store list of unique transaction ids?
-    */
-
     logfile.close();
 
     displayFileContents(cout, LOG_FILE_NAME);
