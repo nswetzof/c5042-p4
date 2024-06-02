@@ -1,3 +1,9 @@
+/**
+ * @file coordinator.cpp
+ * @author Nathan Swetzof
+ * Implements behavior for a coordinator in a 2PC transaction
+*/
+
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -6,7 +12,7 @@
 using namespace std;
 
 /**
- * Store the information necessary to carry out a transaction with a Participant
+ * Store the information necessary to carry out a transaction with a participant
 */
 struct Transaction {
     string host;
@@ -16,6 +22,16 @@ struct Transaction {
     double amount;
 };
 
+/**
+ * Read list of transactions from file into transaction vector and writes the transaction
+ *  information to a log
+ * @param filename Name of the file containing the list of the transactions.  Transactions
+ *  must be formatted such that one transaction is on each line consisting of the amount,
+ *  host name, port number, and account number, each separated by a space
+ * @param transaction The vector which will contain the transaction information obtained
+ *  from the file
+ * @param log The stream to write logging information to
+*/
 void readTransactions(const string &filename, vector<Transaction> &transaction, ostream &log);
 
 /**
@@ -25,7 +41,17 @@ void readTransactions(const string &filename, vector<Transaction> &transaction, 
 */
 void displayFileContents(ostream &output, string filename);
 
+/**
+ * Splits a string into multiple strings defined by a delimiter
+ * @return List of strings after splitting the input string
+ * @param text String to split
+ * @param delimiter Character which delimits the separation
+*/
 vector<string> split(const string &text, const char delimeter = ' ');
+
+/**
+ * @return Input string with whitespace characters removed from the end
+*/
 string rtrim(const string &s);
 
 int main(int argc, char *argv[]) {
@@ -38,7 +64,7 @@ int main(int argc, char *argv[]) {
     const string GLOBAL_ABORT = "GLOBAL-ABORT";
     const string ACK = "ACK";
 
-    string response;
+    string response; // store response from a participant
     ofstream logfile(LOG_FILE_NAME);
 
     if (!logfile.is_open())
@@ -143,7 +169,6 @@ void displayFileContents(ostream &output, string filename) {
     file.close();
 }
 
-// TODO: Put these somewhere where I'm not duplicating code from participant
 vector<string> split(const string &text, const char delimiter) {
     vector<string> result;
     int prev = 0;
