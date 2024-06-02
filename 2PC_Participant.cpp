@@ -37,6 +37,7 @@ void Participant::start_client(const std::string &their_host, u_short their_port
 }
 
 bool Participant::process(const string &incoming_stream_piece) {  // TODO: add mutex pointer for extra credit portion
+    log("Calling process on " + incoming_stream_piece);
     vector<string> request = split(incoming_stream_piece);
     string type = request.at(0);
     string account;
