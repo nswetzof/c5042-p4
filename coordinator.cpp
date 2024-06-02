@@ -38,20 +38,11 @@ int main(int argc, char *argv[]) {
     const string GLOBAL_ABORT = "GLOBAL-ABORT";
     const string ACK = "ACK";
 
-    // string source_host = argv[3], dest_host = argv[6];
-    // int source_port = atoi(argv[4]), dest_port = atoi(argv[7]);
-    // string transfer = argv[2]; // TODO: handle numbers < 0
-    // string source_account = argv[5], dest_account = argv[8];
-    // string source_response, dest_response;
-    // string message;
+    string response;
     ofstream logfile(LOG_FILE_NAME);
 
     if (!logfile.is_open())
         throw runtime_error("Failed to open " + LOG_FILE_NAME);
-
-    // logfile << "Transaction: $" << transfer
-    //     << "\n\tFrom:\t" << source_host << ":" << source_port << " account #" << source_account
-    //     << "\n\tTo:\t" << dest_host << ":" << dest_port << " account #" << dest_account << endl;
 
     // create transactions
     vector<Transaction> transactions;
@@ -74,49 +65,35 @@ int main(int argc, char *argv[]) {
     }
 
     // get participant responses
+    string message = GLOBAL_COMMIT;
     for (size_t i = 0; i < transactions.size(); i++) {
-        string response = transactions.at(i).client.get_response();
+        response = transactions.at(i).client.get_response();
         logfile << "Got " << response << " from " << transactions.at(i).host 
             << ":" << transactions.at(i).port << endl;
+        if (response != COMMIT_RESPONSE)
+            message = GLOBAL_ABORT;
     }
 
-    // TCPClient source_client(source_host, source_port);
-    // TCPClient dest_client(dest_host, dest_port);
-    // int transaction_id = 1; // TODO: modify or delete
-    // string tid = to_string(transaction_id);
+    // send GLOBAL-COMMIT or GLOBAL-ABORT
+    for (size_t i = 0; i < transactions.size(); i++) {
+        logfile << "Sending message '" << message << "' to "
+            << transactions.at(i).host << ":" << transactions.at(i).port << endl;
+        transactions.at(i).client.send_request(message + ' ' + transactions.at(i).account);
+    }
 
-    // logfile << "Connected to participant " << source_host << ":" << source_port << endl;
-    // logfile << "Connected to participant " << dest_host << ":" << dest_port << endl;
+    // wait for ACKs
+    bool acknowledged = true;
+    for (size_t i = 0; i < transactions.size(); i++) {
+        if (transactions.at(i).client.get_response() != ACK)
+            acknowledged = false;
+    }
 
-    // // make requests to participants
-    // logfile << "Sending message '" << VOTE_REQUEST << "' " << source_account << " -" << transfer << " to " 
-    //     << source_host << ":" << source_port << endl;
-    // source_client.send_request(VOTE_REQUEST + " -" + transfer + " " + source_account);
-
-    // logfile << "Sending message '" << VOTE_REQUEST << "' " << dest_account << " " << transfer << " to " 
-    //     << dest_host << ":" << dest_port << endl;
-    // dest_client.send_request(VOTE_REQUEST + " " + transfer + " " + dest_account);
-
-    // // get participant responses
-    // source_response = source_client.get_response();
-    // logfile << "Got " << source_response << " from " << source_host << ":" << source_port << endl;
-    // dest_response = dest_client.get_response();
-    // logfile << "Got " << dest_response << " from " << dest_host << ":" << dest_port << endl;
-
-    // if (source_response == COMMIT_RESPONSE
-    //     && dest_response == COMMIT_RESPONSE)
-    //     message = GLOBAL_COMMIT;
-    // else
-    //     message = GLOBAL_ABORT;
-
-    // // send GLOBAL-COMMIT or GLOBAL-ABORT
-    // logfile << "Sending message '" << message << "' to " 
-    //     << source_host << ":" << source_port << endl;
-    // source_client.send_request(message + ' ' + source_account);
-
-    // logfile << "Sending message '" << message << "' to " 
-    //     << dest_host << ":" << dest_port << endl;
-    // dest_client.send_request(message + ' ' + dest_account);
+    if (acknowledged)
+        logfile << "Transaction committed." << endl;
+    else {
+        logfile << "Invalid response.  Responses must all be " + ACK << "." << endl;
+        return EXIT_FAILURE;
+    }
 
     // // wait for ACKs
     // source_response = source_client.get_response();
