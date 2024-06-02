@@ -129,11 +129,11 @@ vector<string> Participant::split(const string &text, const char delimiter) {
 }
 
 string Participant::rtrim(const string &s) {
-    int last = s.length() - 1;
-    while (isspace(s[last]))
-        last--;
+    int end = s.length();
+    while (isspace(s[end]))
+        end--;
     
-    return s.substr(0, last + 1);
+    return s.substr(0, end);
 }
 
 void Participant::updateAccounts() {
