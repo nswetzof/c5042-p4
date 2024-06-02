@@ -37,7 +37,6 @@ void Participant::start_client(const std::string &their_host, u_short their_port
 }
 
 bool Participant::process(const string &incoming_stream_piece) {  // TODO: add mutex pointer for extra credit portion
-    // TODO: have to log
     vector<string> request = split(incoming_stream_piece);
     string type = request.at(0);
     string account;
@@ -129,11 +128,11 @@ vector<string> Participant::split(const string &text, const char delimiter) {
 }
 
 string Participant::rtrim(const string &s) {
-    int end = s.length();
-    while (isspace(s[end]))
-        end--;
+    int last = s.length() - 1;
+    while (isspace(s[last]))
+        last--;
     
-    return s.substr(0, end);
+    return s.substr(0, last + 1);
 }
 
 void Participant::updateAccounts() {

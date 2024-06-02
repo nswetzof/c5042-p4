@@ -169,7 +169,7 @@ void readTransactions(const string &filename, vector<Transaction> &transactions,
 
         transactions.push_back(Transaction {host, port, TCPClient(move(client)), account, amount});
 
-        log << "\t$" << amount << " from " << host << ":" << port
+        log << "\t$" << abs(amount) << ((amount < 0) ? " from " : " to ") << host << ":" << port
             << " account #" << account << '\n';
     }
 
