@@ -37,9 +37,11 @@ bool Participant::process(const string &incoming_stream_piece) {
     string account;
     double amount;
 
-    if (type == "VOTE-REQUEST") {
-        if (state != INIT)
-            throw runtime_error("Invalid state.  Cannot handle " + type + " unless in INIT state.");
+    if (state == INIT) {
+        if (type != "VOTE-REQUEST") {
+            log("Invalid request " + type + ". State: INIT");
+            return false;
+        }
 
         amount = atof(request.at(1).c_str());
         account = request.at(2);
@@ -51,62 +53,69 @@ bool Participant::process(const string &incoming_stream_piece) {
                 log("Got " + type + ", replying VOTE-COMMIT.  State: READY");
                 respond("VOTE-COMMIT");
                 state = READY;
-
-                return true;
             }
+            else {
+                log("Got " + type + ", replying VOTE-ABORT.  State: ABORT");
+                respond("VOTE-ABORT");
+                state = ABORT;
+            }
+
+            return true;
+        }
+        else {
+            log("Error: " + account + " not found");
+            return false;
+        }
+    }
+
+    else if (state == READY || state == ABORT) {
+        
+        if (type == "GLOBAL-COMMIT") {
+            account = request.at(1);
+
+            if (accounts.find(account) == accounts.end()) {
+                log("Error: " + account + " not found");
+                return false;
+            }
+
+            state = COMMIT;
+            log("Got GLOBAL-COMMIT, replying ACK. State: COMMIT");
+            respond("ACK");
+            
+            log("Committing " + to_string(-1 * accounts[account].held) + " from account " + account + '\n');
+            accounts[account].balance -= accounts[account].held;
+            accounts[account].held = 0;
+            updateAccounts();
+            state = INIT;
+        }
+        else if (type == "GLOBAL-ABORT") {
+            account = request.at(1);
+            
+            if (accounts.find(account) == accounts.end()) {
+                log("Error: " + account + " not found");
+                return false;
+            }
+
+            state = ABORT;
+            log("Got GLOBAL-ABORT, replying ACK. State: ABORT");
+            respond("ACK");
+            
+            log("Releasing hold from account " + account + '\n');
+            account = request.at(1);
+            accounts[account].held = 0;
+
+            state = INIT;
+        }
+        else {
+            log("Invalid request " + type + ". State: READY");
+            accounts[account].held = 0;
+            return false;
         }
 
-        log("Got " + type + ", replying VOTE-ABORT.  State: ABORT");
-        respond("VOTE-ABORT");
-        state = ABORT;
-
         return true;
     }
 
-    if (type == "GLOBAL-COMMIT") {
-        if (state != READY)
-            throw runtime_error("Invalid state.  Cannot handle " + type + " unless in READY state.");
-
-        account = request.at(1);
-
-        if (accounts.find(account) == accounts.end())
-            throw runtime_error("Error: " + account + " not found");
-
-        state = COMMIT;
-        log("Got GLOBAL-COMMIT, replying ACK. State: COMMIT");
-        respond("ACK");
-        
-        log("Committing " + to_string(-1 * accounts[account].held) + " from account " + account + '\n');
-        accounts[account].balance -= accounts[account].held;
-        accounts[account].held = 0;
-        updateAccounts();
-        state = INIT;
-
-        return true;
-    }
-
-    if (type == "GLOBAL-ABORT") {
-        if (state != READY && state != ABORT)
-            throw runtime_error("Invalid state.  Cannot handle " + type + " unless in READY or ABORT state.");
-
-        account = request.at(1);
-        if (accounts.find(account) == accounts.end())
-            throw runtime_error("No transaction to abort.  " + account + " not found");
-
-        state = ABORT;
-        log("Got GLOBAL-ABORT, replying ACK. State: ABORT");
-        respond("ACK");
-        
-        log("Releasing hold from account " + account + '\n');
-        account = request.at(1);
-        accounts[account].held = 0;
-
-        state = INIT;
-        return true;
-    }
-
-    // log("Why am I here?");
-    return false; // FIXME: This will result in the server closing.
+    return false;
 }
 
 vector<string> Participant::split(const string &text, const char delimiter) {
