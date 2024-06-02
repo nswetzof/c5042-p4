@@ -95,22 +95,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // // wait for ACKs
-    // source_response = source_client.get_response();
-    // dest_response = dest_client.get_response();
-
-    // if (source_response == ACK && dest_response == ACK) {
-    //     if (message == GLOBAL_COMMIT)
-    //         logfile << "Transaction committed." << endl;
-    //     else
-    //         logfile << "Transaction aborted." << endl;
-    // }
-    // else {
-    //     logfile << "Invalid response\n\tsource response: " << source_response
-    //         << "\n\tdestination response: " << dest_response << endl;
-    //     return EXIT_FAILURE;
-    // }
-
     // TODO: Extra Credit: start new thread on request?
     /*
         take file input
