@@ -1,3 +1,9 @@
+/**
+ * @file 2PC_Participant.h
+ * @author Nathan Swetzof
+ * Represents participant in a 2PC transaction.
+*/
+
 #pragma once
 
 #include <fstream>
@@ -8,10 +14,16 @@
 
 using namespace std;
 
+/**
+ * Participant class represents one participant in a 2PC transaction
+*/
 class Participant : public TCPServer {
 public:
     /**
-     * Constructor stores accounts listed in file
+     * Constructor loads accounts listed in file
+     * @param port port number for the Participant to run on
+     * @param acc_file_name name of the file containing the accounts/balances
+     * @param log_file_name name of the log file to write program output to
     */
     Participant(const u_short port, const string acc_file_name, const string log_file_name);
     ~Participant();
@@ -27,30 +39,23 @@ protected:
 
     /**
      * Process transaction request
-     * @param incoming_stream_piece Message received from the coordinator.  Valid message types are as follows:
-     *  VOTE-REQUEST [amount] [account] - request a transaction from account specified of amount specified (positive or negative)
-     *      If the account exists and there are sufficient funds to execute the transaction, a hold will be placed
-     *      and a VOTE-COMMIT response will be sent to the coordinator
-     *  GLOBAL-COMMIT - execute the transaction
-     *  GLOBAL-ABORT - abort the transaction
+     * @param incoming_stream_piece Message received from the coordinator.
      * @return true if request is valid depending on the state of the Participant.
     */
     bool process(const std::string &incoming_stream_piece) override;
-    // void respond(const std::string &response) override; // TODO: Delete?  Don't see why this needs to be overridden
 private:
     struct account {
         double balance;
         double held;
     };
     unordered_map<string, account> accounts;
-    // unordered_map<int, string> open_transactions;
     const string acc_file_name, log_file_name;
     enum State {INIT, READY, COMMIT, ABORT};
     State state;
 
     /**
      * Updates the accounts file associated with this instance with the current balances stored in
-     *  the accounts map
+     *  the accounts field
     */
     void updateAccounts();
 
