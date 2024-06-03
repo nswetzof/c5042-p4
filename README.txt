@@ -14,4 +14,4 @@ For example, to withdraw $1.00 from account number 0123-45.67 on "localhost":101
 
 Extra Credit:
 a. Handling any number of participants
-Multiple participants (> 2) are supported.  Every transaction in the transaction file will be executed provided each transaction is with a different host and the sum of all transactions adds up to zero (no money is unaccounted for).
+Multiple participants (> 2) are supported.  Every transaction in the transaction file will be executed provided each transaction is on a unique host:port pair and the sum of all transactions adds up to zero (no money is unaccounted for).

@@ -32,6 +32,9 @@ void Participant::start_client(const std::string &their_host, u_short their_port
 }
 
 bool Participant::process(const string &incoming_stream_piece) {
+    if (incoming_stream_piece.empty())
+        return false;
+
     vector<string> request = split(incoming_stream_piece);
     string type = request.at(0);
     string account;
